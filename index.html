@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="dist/themes/default/style.min.css" />
+    <link href="css/styles.css" rel="stylesheet" type="text/css">
+    
+    <script src="libs/jquery-1.11.2.js"></script>
+    <script src="dist/jstree.js"></script>
+    <script src="js/scripts.js"></script>
+    <script src="/ckeditor/ckeditor.js"></script>
+    <script src="/ckeditor/adapters/jquery.js"></script>
+
+    <title>ConfigUI</title>
+  </head>
+<body>
+
+<div class="container">
+        
+  <div class="col-xs-3">
+      <form id="s">
+        <input type="search" id="q" />
+          <button type="submit">Search</button>
+      </form>
+      
+          <div id="json">
+              
+              
+          </div>
+  </div>
+
+  <div class="col-xs-9">
+    <form method="post">
+        <p>
+            Editor:<br>
+            <textarea name="editor1" id="editor1">
+            <p>Initial editor content.</p></textarea>
+            
+        </p>
+        <p>
+            <input type="submit">
+        </p>
+    </form>
+  </div>
+    
+    
+    
+<!--    Sample JQuery drag / drop-->
+    
+    <div class="drag" style="padding:5px; display:inline-block; background:black; border-radius:4px;">Drag me</div>
+    <div id="tree" class="jstree jstree-default"></div>
+    <div class="drop" style="min-height:200px; min-width:200px; background:gray; border-radius:10px;">Drop here</div>
+
+<script>
+    $(function () {
+        $('#tree').jstree({
+            'plugins': [ 'dnd' ]
+        });
+
+        $('.drag')
+            .on('mousedown', function (e) {
+                return $.vakata.dnd.start(e, { 'jstree' : true, 'obj' : $(this), 'nodes' : [{ id : true, text: $(this).text() }] }, '<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + $(this).text() + '</div>');
+            });
+        $(document)
+            .on('dnd_move.vakata', function (e, data) {
+                var t = $(data.event.target);
+                if(!t.closest('.jstree').length) {
+                    if(t.closest('.drop').length) {
+                        data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
+                    }
+                    else {
+                        data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
+                    }
+                }
+            })
+            .on('dnd_stop.vakata', function (e, data) {
+                var t = $(data.event.target);
+                if(!t.closest('.jstree').length) {
+                    if(t.closest('.drop').length) {
+                        $(data.element).clone().appendTo(t.closest('.drop'));
+                        // node data: 
+                        // if(data.data.jstree && data.data.origin) { console.log(data.data.origin.get_node(data.element); }
+                    }
+                }
+            });
+  });
+</script>
+    
+</div>
+
+</body>
+</html>
