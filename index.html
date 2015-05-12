@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="dist/themes/default/style.min.css" />
+    <link rel="stylesheet" href="dist/themes/proton/style.min.css" />
+	<link href="css/bootswatch.css" rel="stylesheet" type="text/css">
     <link href="css/styles.css" rel="stylesheet" type="text/css">
+
     
     <script src="libs/jquery-1.11.2.js"></script>
     <script src="dist/jstree.js"></script>
@@ -10,47 +12,31 @@
     <script src="/ckeditor/ckeditor.js"></script>
     <script src="/ckeditor/adapters/jquery.js"></script>
 
-    <title>ConfigUI</title>
+    <title>Email Template</title>
   </head>
 <body>
+	
+	<div class="jumbotron">
+		<h1>Email Template</h1>
+	</div>
+	
+	<div class= "container" id="body-container">
 
-<div class="container">
-        
-  <div class="col-xs-3">
-      <form id="s">
-        <input type="search" id="q" />
-          <button type="submit">Search</button>
-      </form>
-      
-          <div id="json">
-              
-              
-          </div>
-  </div>
+		<div id="tree" class="col-xs-3">
 
-  <div class="col-xs-9">
-    <form method="post">
-        <p>
-            Editor:<br>
-            <textarea name="editor1" id="editor1">
-            </textarea>
-            
-        </p>
-        <p>
-            <input type="submit">
-        </p>
-    </form>
-  </div>
-    
-<!--
-    
-    <div class="drag" style="padding:5px; display:inline-block; background:black; border-radius:4px;">Drag me</div>
-    <div id="tree" class="jstree jstree-default"></div>
-    <div class="drop" style="min-height:200px; min-width:200px; background:gray; border-radius:10px;">Drop here</div>
-    
-    
--->
-</div>
+			<div id="json">
+			</div>
+			
+		</div>
 
+	  <div id="ckeditor" class="col-xs-9">
+		<form method="post">
+			<textarea name="editor1" id="editor1">
+			</textarea>
+
+			<input type="submit" class="btn btn-default">
+		</form>
+	  </div>
+	</div>
 </body>
 </html>

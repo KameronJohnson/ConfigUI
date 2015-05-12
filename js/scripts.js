@@ -100,101 +100,131 @@ var jsonObj = {
 }
 
 $(document).ready(function() {
-	
-	
-	function parentLoop() {
-		var parents = [];
-		var parent_id = 0;
-		var propertySources = jsonObj.PropertySources
-			for (var i = 0; i < propertySources.length; i++) {
-				propertySources[i].parent_id = parent_id++; 
-				parents.push(propertySources[i]);
+
+	var parseJsTreeData = function (propertySources) {
+		var arrayToReturn = [];
+		var item_id = 0;
+		
+
+		for ( var i = 0; i < propertySources.length; i++ ) {
+			arrayToReturn.push({ id : item_id++, text : propertySources[i].Name, children: []})
+			for ( var n = 0; n < propertySources[i].Data.length; n++ ) {
+				arrayToReturn[i]['children'].push({ id : item_id++, text: propertySources[i].Data[n].Name, 
+												   value: propertySources[i].Data[n].Value })	
 			}
-		return parents;
+		}
+		return arrayToReturn;
 	}
-	
-	function childLoop() {
-		var children = [];
-		var child_id = 0;
-		var propertySources = jsonObj.PropertySources
-			for (var i = 0; i < propertySources.length; i++) {
-				 var items = propertySources[i]["Data"];
-					for (var n = 0; n < items.length; n++) {
-						items[n].id = child_id++;
-						items[n].children = items[n].Name
-						children.push(items[n]);
-
-					}
-			}
-		return children;
-	}
-	
-	var addChild = childLoop();
-	var addParent = parentLoop();
-	
-
-//	for (var key in addChild) {
-//		console.log(addChild[key])
-//	}
-//	for (var key in addParent) {
-//		console.log(addParent[key])
-//	}
-
-	console.log(addParent);
 	
 	
     //access the CKEDITOR.editor object using the editor property
 	var editor1 = $( 'textarea#editor1' ).ckeditor().editor;
 	
+	//load jstree
 	$('#json').jstree({
 		//load plugins
-		'plugins' : [ "dnd", "search", "sort", "unique", "themes", "ui", "json_data" ],
+		'plugins' : [ "dnd", "sort", "unique", "themes", "ui", "json_data" ],
 
-
-		//apple theme
-		'themes' : {
-			"theme" : "apple",
-		},
 		'core' : {
-			'data' : (function () {
-						var parents = [];
-						var children = [];
-						var parent_id = 0;
-						var child_id = 0;
-						var propertySources = jsonObj.PropertySources
-							for (var i = 0; i < propertySources.length; i++) {
-								propertySources[i].parent_id = parent_id++; 
-								parents.push({ id: propertySources[i].id, text: propertySources[i].Name });
-								
-								
-							var items = propertySources[i]["Data"];
-								for (var n = 0; n < items.length; n++) {
-									items[n].id = child_id++;
-									items[n].children = items[n].Name
-									children.push({ id: items[n].children.id, text: items[n].children.Name });
-
-								}
-
-							}
-						return parents;
-						return children;
-					})()
-			} 
+			'data' : parseJsTreeData(jsonObj.PropertySources),
+			'themes' : {
+				'name': 'proton',
+            	'responsive': true
+			}
+		}
 	});
 
-			
-		$("#json").on("select_node.jstree",
-			function(evt, data) {
-				editor1.insertText(ckValue[data.node.id]);
+	
+	var getckValue = function() {
+		var ckValue = {}
+		var data = parseJsTreeData(jsonObj.PropertySources)
+		
+		for ( var i = 0; i < data.length; i++) {
+			for (var n = 0; n < data[i].children.length; n++) { 
+				ckValue[data[i].children[n].id] = data[i].children[n].value
+			}
+		}
+		return ckValue
+	}
+	
+	ckValue = getckValue();
+	
+	
+//	insert data to editor1 
+	$("#json").on("select_node.jstree",
+		function(evt, data) {
+			editor1.insertText(ckValue[data.node.id]);
 
 	});	
 	
-//	var ckValue = {
-//		treePop[key].id = jsonObj.PropertySources[0].Data[0].Value;
+	
+	// get the email text as a string, need to tell function to put it into jsonObj at HTMLBody
+	var parseckData = function() {
+		var ckData = CKEDITOR.instances.editor1.document.getBody().getText();
+		jsonObj.BodyHTML.Text = ckData;
+		return ckData;
+	}
+	//		
+	
+	
+	editor1.on('click', parseckData) 
+	
+	
+	//registers var editor1 as a listener to 'drop' event
+//    editor1.on('drop', onDrop);
+//	
+//	function onDrop(evt) {
+//		console.log("droppppp");
+//		console.log(evt);
 //	}
+
+    
+    //search function
+//    $("#s").submit(function(e) {
+//        e.preventDefault();
+//        $("#container").jstree(true).search($("#q").val());
+//    });
+    
+
+//    $(function () {
+////        $('#tree').jstree({
+////            'plugins': [ 'dnd' ]
+////        });
+////
+////        $('.drag')
+////            .on('mousedown', function (e) {
+////                return $.vakata.dnd.start(e, { 'jstree' : true, 'obj' : $(this), 'nodes' : 
+////											  [{ id : true, text: $(this).text() }] }, 
+////				'<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + 
+////										  $(this).text() + '</div>');
+////            });
+//		
+//        $(document).on('dnd_move.vakata', function (e, data) {
+//                var t = $(data.event.target);
+//                if(!t.closest('.jstree').length) {
+//                    if(t.closest('.drop').length) {
+//                        data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
+//                    }
+//                    else {
+//                        data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
+//                    }
+//                }
+//            })
+//            .on('dnd_stop.vakata', function (e, data) {
+//                var t = $(data.event.target);
+//                if(!t.closest('.jstree').length) {
+//                    if(t.closest('.drop').length) {
+//                        $(data.element).clone().appendTo(t.closest('.drop'));
+//                        // node data: 
+//                        // if(data.data.jstree && data.data.origin) { console.log(data.data.origin.get_node(data.element); }
+//                    }
+//                }
+//            });
+//  });
+//    
+    
 	
-	
-//	$('#json').jstree({
+	//	$('#json').jstree({
 //		'core' : {
 //		  'data' : [
 //			{"id" : 1,
@@ -230,93 +260,5 @@ $(document).ready(function() {
 //		}
 //	});
 	
-	var ckValue = {
-
-	1 : "",
-	2 : jsonObj.PropertySources[0].Data[0].Value,
-	3 : jsonObj.PropertySources[0].Data[1].Value,
-	4 : "",
-	5 : jsonObj.PropertySources[1].Data[0].Value,
-	6 : jsonObj.PropertySources[1].Data[1].Value,
-	7 : jsonObj.PropertySources[1].Data[2].Value,
-	8 : jsonObj.PropertySources[1].Data[3].Value,
-	9 : jsonObj.PropertySources[1].Data[4].Value,
-	10 : jsonObj.PropertySources[1].Data[5].Value,
-	11 : jsonObj.PropertySources[1].Data[6].Value,
-	12 : jsonObj.PropertySources[1].Data[7].Value
-	}
 	
-//	insert data to editor1 
-	$("#json").on("select_node.jstree",
-			function(evt, data) {
-				editor1.insertText(ckValue[data.node.id]);
-
-	});	
-    
-	//registers var editor1 as a listener to 'drop' event
-    editor1.on('drop', onDrop);
-	
-	function onDrop(evt) {
-		console.log("droppppp");
-		console.log(evt);
-	}
-
-    
-    //search function
-    $("#s").submit(function(e) {
-        e.preventDefault();
-        $("#container").jstree(true).search($("#q").val());
-    });
-    
-    
-    //notification of changed event on console
-	$('#json').on("changed.jstree", function (e, data) {
-	//log out text of node
-		console.log(data.instance.get_selected(true)[0].text);
-		console.log(data.instance.get_node(data.selected[0]).text);
-	});
-
-    
-//<!--    Sample JQuery drag / drop-->
-    
-
-
-    $(function () {
-//        $('#tree').jstree({
-//            'plugins': [ 'dnd' ]
-//        });
-//
-//        $('.drag')
-//            .on('mousedown', function (e) {
-//                return $.vakata.dnd.start(e, { 'jstree' : true, 'obj' : $(this), 'nodes' : 
-//											  [{ id : true, text: $(this).text() }] }, 
-//				'<div id="jstree-dnd" class="jstree-default"><i class="jstree-icon jstree-er"></i>' + 
-//										  $(this).text() + '</div>');
-//            });
-		
-        $(document)
-            .on('dnd_move.vakata', function (e, data) {
-                var t = $(data.event.target);
-                if(!t.closest('.jstree').length) {
-                    if(t.closest('.drop').length) {
-                        data.helper.find('.jstree-icon').removeClass('jstree-er').addClass('jstree-ok');
-                    }
-                    else {
-                        data.helper.find('.jstree-icon').removeClass('jstree-ok').addClass('jstree-er');
-                    }
-                }
-            })
-            .on('dnd_stop.vakata', function (e, data) {
-                var t = $(data.event.target);
-                if(!t.closest('.jstree').length) {
-                    if(t.closest('.drop').length) {
-                        $(data.element).clone().appendTo(t.closest('.drop'));
-                        // node data: 
-                        // if(data.data.jstree && data.data.origin) { console.log(data.data.origin.get_node(data.element); }
-                    }
-                }
-            });
-  });
-    
-    
 });
